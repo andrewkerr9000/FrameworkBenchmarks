@@ -299,11 +299,6 @@ class Installer:
     self.__run_command("play-1.2.5/play1 install siena", send_yes=True)
 
     ##############################
-    # Vert.x
-    ##############################
-    self.__run_command("curl http://vert-x.github.io/vertx-downloads/downloads/vert.x-1.3.1.final.tar.gz | tar xvz")
-
-    ##############################
     # Yesod
     ##############################
     self.__run_command("cabal update")
