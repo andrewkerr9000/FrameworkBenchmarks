@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>vertx2</groupId>
-  <artifactId>vertx2</artifactId>
+  <groupId>frameworkbenchmark</groupId>
+  <artifactId>vertx</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>Project - vertx2</name>
+  <name>Project - hellovertx</name>
   <url>http://maven.apache.org</url>
 
   <parent>
