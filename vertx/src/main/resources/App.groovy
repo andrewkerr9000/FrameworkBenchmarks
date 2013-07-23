@@ -6,19 +6,24 @@ def persistorConf = [
         host: 'localhost'
 ]
 
-def permitted =
-    [
-            [
-                    'address' : 'hello.persistor'
-            ]
-    ]
-
 container.with {
 
     // Deploy the busmods
-    deployModule('io.vertx~mod-mongo-persistor~2.0.0-final', persistorConf, 8)
+    deployModule('io.vertx~mod-mongo-persistor~2.0.0-final', persistorConf, 8) { persistorResult ->
+        if (persistorResult.succeeded) {
+            deployVerticle('hellovertx.WebServer', [:], 8){ webServerResult ->
+                if (webServerResult.succeeded) {
+                    println "The WebServer has been deployed, deployment ID is ${webServerResult.result}"
+                } else {
+                    webServerResult.cause.printStackTrace()
+                }
+            }
+        } else {
+            persistorResult.cause.printStackTrace()
+        }
+    }
 
     // Start the web server
 
-    deployVerticle('vertx2.WebServer', ['permitted': permitted], 8)
+
 }
