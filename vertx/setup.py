@@ -3,22 +3,28 @@ import subprocess
 import sys
 import setup_util
 import os
+import signal
+
+proc = None
 
 def start(args):
-  setup_util.replace_text("vertx/App.groovy", "host: '.*'", "host: '" + args.database_host + "'")
+  global proc
+  setup_util.replace_text("vertx/src/main/resources/App.groovy", "host: '.*'", "host: '" + args.database_host + "'")
 
   try:
-    subprocess.check_call("javac WebServer.java -cp $VERTX_HOME/lib/vertx-core-1.3.1.final.jar:$VERTX_HOME/lib/vertx-platform-1.3.1.final.jar:$VERTX_HOME/lib/mustache.jar:$VERTX_HOME/lib/jackson-core-asl-1.9.4.jar:$VERTX_HOME/lib/jackson-mapper-asl-1.9.4.jar:$VERTX_HOME/lib/guava-11.0.2.jar", shell=True, cwd="vertx")
-    subprocess.Popen("vertx run App.groovy -repo vert-x.github.io", shell=True, cwd="vertx")
-    return 0
+    proc = subprocess.Popen("stdbuf -oL mvn clean install -DskipTests vertx:runMod", shell=True,stdout=subprocess.PIPE, preexec_fn=os.setsid)
+
+    for data in iter(proc.stdout.readline, ""):
+      print data,
+      if 'The WebServer has been deployed' in data:
+        return 0
+
+    return 1
+
   except subprocess.CalledProcessError:
     return 1
-def stop():
-  p = subprocess.Popen(['ps', 'aux'], stdout=subprocess.PIPE)
-  out, err = p.communicate()
-  for line in out.splitlines():
-    if 'App.groovy' in line:
-      pid = int(line.split(None, 2)[1])
-      os.kill(pid, 9)
 
+def stop():
+  global proc
+  os.killpg(proc.pid, signal.SIGTERM)
   return 0
