@@ -1,7 +1,9 @@
 package hellovertx;
 
+import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
+import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonArray;
@@ -18,28 +20,43 @@ public class WebServer extends Verticle
   public void start()
   {
     RouteMatcher routeMatcher = new RouteMatcher()
-       .get("/json", new Handler<HttpServerRequest>()
-    {
-      @Override
-      public void handle(HttpServerRequest httpServerRequest)
-      {
-        handleJson(httpServerRequest);
-      }
-    })
-       .get("/db", new Handler<HttpServerRequest>()
-       {
-         @Override
-         public void handle(HttpServerRequest httpServerRequest)
-         {
-           handleDb(httpServerRequest);
-         }
-       });
+        .get("/json", new Handler<HttpServerRequest>()
+        {
+          @Override
+          public void handle(HttpServerRequest httpServerRequest)
+          {
+            handleJson(httpServerRequest);
+          }
+        })
+        .get("/db", new Handler<HttpServerRequest>()
+        {
+          @Override
+          public void handle(HttpServerRequest httpServerRequest)
+          {
+            handleDb(httpServerRequest);
+          }
+        })
+        .get("/plaintext", new Handler<HttpServerRequest>()
+        {
+          @Override
+          public void handle(HttpServerRequest httpServerRequest)
+          {
+            handlePlaintext(httpServerRequest);
+          }
+        });
 
     vertx
         .createHttpServer()
         .requestHandler(routeMatcher)
         .setAcceptBacklog(10000)
-        .listen(8080);
+        .listen(8080, new Handler<AsyncResult<HttpServer>>()
+        {
+          @Override
+          public void handle(AsyncResult<HttpServer> httpServerAsyncResult)
+          {
+            System.out.println("Server listening");
+          }
+        });
   }
 
   private void handleJson(HttpServerRequest req)
@@ -49,6 +66,14 @@ public class WebServer extends Verticle
         .response()
         .putHeader("Content-Type", "application/json; charset=UTF-8")
         .end(helloWorld.encode());
+  }
+
+  private void handlePlaintext(HttpServerRequest req)
+  {
+    req
+        .response()
+        .putHeader("Content-Type", "text/plain")
+        .end("Hello, World!");
   }
 
   private void handleDb(final HttpServerRequest req)
@@ -101,16 +126,14 @@ public class WebServer extends Verticle
 
   private int getQueries(HttpServerRequest req)
   {
+    String queriesString = req.params().get("queries");
+    if (queriesString == null)
+    {
+      return 1;
+    }
     try
     {
-      String queriesString = req.params().get("queries");
-      if (queriesString != null)
-      {
-        return Integer.parseInt(queriesString);
-      } else
-      {
-        return 1;
-      }
+      return Integer.parseInt(queriesString);
     } catch (NumberFormatException nfe)
     {
       return 1;
