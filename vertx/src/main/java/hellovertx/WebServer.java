@@ -11,6 +11,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -65,6 +66,8 @@ public class WebServer extends Verticle
     req
         .response()
         .putHeader("Content-Type", "application/json; charset=UTF-8")
+        .putHeader("Server", "vert.x 2.0.1")
+        .putHeader("Date", new Date().toString())
         .end(helloWorld.encode());
   }
 
@@ -73,6 +76,8 @@ public class WebServer extends Verticle
     req
         .response()
         .putHeader("Content-Type", "text/plain")
+        .putHeader("Server", "vert.x 2.0.1")
+        .putHeader("Date", new Date().toString())
         .end("Hello, World!");
   }
 
@@ -116,6 +121,8 @@ public class WebServer extends Verticle
                 // All queries have completed; send the response.
                 req.response()
                     .putHeader("Content-Type", "application/json; charset=UTF-8")
+                    .putHeader("Server", "vert.x 2.0.1")
+                    .putHeader("Date", new Date().toString())
                     .end(worlds.encode());
               }
             }
